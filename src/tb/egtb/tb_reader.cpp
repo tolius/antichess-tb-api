@@ -22,9 +22,9 @@ map<string, shared_ptr<TB_Reader>> TB_Reader::tb_cache;
 bool TB_Reader::auto_load = true;
 
 
-void TB_Reader::init(const string& path, bool load_all)
+void TB_Reader::init(const string& tb_path, bool load_all)
 {
-	egtb_path = path;
+	egtb_path = tb_path;
 	Tablebases_init();
 	if (load_all)
 	{
