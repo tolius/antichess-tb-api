@@ -22,9 +22,9 @@ map<string, shared_ptr<TB_Reader>> TB_Reader::tb_cache;
 bool TB_Reader::auto_load = true;
 
 
-void TB_Reader::init(const string& syzygy_path, bool load_all)
+void TB_Reader::init(const string& path, bool load_all)
 {
-	egtb_path = fs::path(syzygy_path).parent_path() / "EGTB";
+	egtb_path = path;
 	Tablebases_init();
 	if (load_all)
 	{
@@ -50,10 +50,12 @@ void TB_Reader::init(const string& syzygy_path, bool load_all)
 				}
 			}
 		}
+#ifdef UCI_INFO_OUTPUT
 		cout << "info string Found " << tb_cache.size() << " EGTB";
 		if (tb_cache.size() != 1)
 			cout << "s";
 		cout << endl;
+#endif
 	}
 }
 
@@ -132,7 +134,9 @@ TB_Reader::TB_Reader(const string& tb_name)
 
 TB_Reader::~TB_Reader()
 {
+#ifdef UCI_INFO_OUTPUT
 	cout << "info string Discarding EGTB " << tb_name << endl;
+#endif
 	dz_close(this->dz_header);
 }
 
