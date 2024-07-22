@@ -250,6 +250,8 @@ val_dtz TB_Reader::read_one(size_t key, bool is_compressed)
 		else if (val_12bit) {
 			char data[3];
 			int err = dz_read(dz_header, (unsigned long)(tbtable->header_size + i), num_bytes, data);
+			if (err != 0)
+				error("Can't read data from the file");
 			read_val_12bit(tb_bytes, key, data);
 		}
 		else {
