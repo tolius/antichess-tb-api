@@ -120,7 +120,7 @@ int antichess_tb_probe_dtw(const int* white_squares, const int* white_pieces, si
 		*dtw =  tb_val;
 		return (tb_dtz > 100) ? 1 : 0;
 	}
-	catch (exception e)
+	catch (const std::exception& e)
 	{
 		return -10;
 	}
