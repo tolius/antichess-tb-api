@@ -278,7 +278,14 @@ val_dtz TB_Reader::load_one(const char* tb_bytes, bool is_compressed, bool val_b
 	uint8_t dtz = has_dtz ? reinterpret_cast<const uint8_t&>(tb_bytes[0]) : 0;
 	if (has_dtz)
 		tb_bytes++;
-	int16_t val = val_big ? (tb_bytes[0] << 8) | reinterpret_cast<const uint8_t&>(tb_bytes[1]) : tb_bytes[0];
+	int16_t val;
+	if (val_big) {
+		uint16_t uval = (reinterpret_cast<const uint8_t&>(tb_bytes[0]) << 8) | reinterpret_cast<const uint8_t&>(tb_bytes[1]);
+		val = reinterpret_cast<int16_t&>(uval);
+	}
+	else {
+		val = reinterpret_cast<const int8_t&>(tb_bytes[0]);
+	}
 	if (is_compressed && dtz == 0 && val == 0)
 		val = DRAW;
 	if (val == NONE || dtz > abs(val) || (is_compressed && dtz > DTZ_MAX))

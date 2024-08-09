@@ -1,20 +1,11 @@
 #include "antichess_tb_api.h"
 
 #include "tb/types.h"
-#include "tb/egtb/tb_reader.h"
-#include "tb/endgame.h"
 #include "tb/thread.h"
-#include "tb/uci.h"
-#include "tb/syzygy/tbprobe.h"
+#include "tb/egtb/tb_reader.h"
 
-#include "tb/egtb/elements.h"
-#include "tb/bitboard.h"
-#include "tb/position.h"
-#include "tb/search.h"
-#include "tb/tt.h"
-
-#include <algorithm> 
-#include <tuple> 
+#include <algorithm>
+#include <tuple>
 #include <cctype>
 #include <locale>
 #include <iostream>

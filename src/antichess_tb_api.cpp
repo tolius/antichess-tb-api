@@ -6,12 +6,9 @@
 #include "tb/thread.h"
 #include "tb/uci.h"
 #include "tb/syzygy/tbprobe.h"
-
-#include "tb/egtb/elements.h"
 #include "tb/bitboard.h"
 #include "tb/position.h"
 #include "tb/search.h"
-#include "tb/tt.h"
 
 #include <string>
 
