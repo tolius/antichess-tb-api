@@ -72,7 +72,7 @@ int tests()
 		                                 squares[BLACK], pieces[BLACK], num_black_pieces, 
 		                                 pos.side_to_move(), pos.ep_square(), &dtw);
 		if (res != ec)
-			cout << " Error code " << ec << " != " << res << " --> ERROR";
+			cout << "Error code " << ec << " != " << res << " --> ERROR";
 		else if (dtw != dtw_res)
 			cout << "DTW " << dtw << " != " << dtw_res << " --> ERROR";
 		else
