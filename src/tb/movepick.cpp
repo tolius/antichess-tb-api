@@ -20,6 +20,8 @@
 
 #include "movepick.h"
 
+namespace AntichessTb {
+
 namespace {
 
   enum Stages {
@@ -283,3 +285,5 @@ top:
   assert(false);
   return MOVE_NONE; // Silence warning
 }
+
+} // namespace AntichessTb

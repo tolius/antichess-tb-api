@@ -6,23 +6,17 @@ extern "C" {
 }
 
 #include <sstream>
-#include <array>
-#include <list>
 #include <iostream>
-#include <fstream>
 
-using namespace std::placeholders;
+namespace AntichessTb {
 
-
-namespace egtb
-{
-fs::path TB_Reader::egtb_path;
-string TB_Reader::file_extension_compressed = DTZ101_AS_DRAW ? ".an2" : ALWAYS_SAVE_DTZ ? ".an0" : ".an1";
-map<string, shared_ptr<TB_Reader>> TB_Reader::tb_cache;
+std::filesystem::path TB_Reader::egtb_path;
+std::string TB_Reader::file_extension_compressed = DTZ101_AS_DRAW ? ".an2" : ALWAYS_SAVE_DTZ ? ".an0" : ".an1";
+std::map<std::string, std::shared_ptr<TB_Reader>> TB_Reader::tb_cache;
 bool TB_Reader::auto_load = true;
 
 
-void TB_Reader::init(const string& tb_path, bool load_all)
+void TB_Reader::init(const std::string& tb_path, bool load_all)
 {
 	egtb_path = tb_path;
 	Tablebases_init();
@@ -30,16 +24,16 @@ void TB_Reader::init(const string& tb_path, bool load_all)
 	{
 		auto_load = false;
 		tb_cache.clear();
-		for (const auto& entry : fs::directory_iterator(egtb_path))
+		for (const auto& entry : std::filesystem::directory_iterator(egtb_path))
 		{
 			if (entry.is_regular_file())
 			{
 				const auto& path = entry.path();
-				string extension = path.extension().generic_string();
+				std::string extension = path.extension().generic_string();
 				if (extension == file_extension_compressed)
 				{
-					string tb_name = path.stem().generic_string();
-					auto tb = make_shared<TB_Reader>(tb_name);
+					std::string tb_name = path.stem().generic_string();
+					auto tb = std::make_shared<TB_Reader>(tb_name);
 					if (dz_is_open(tb->dz_header)) {
 						tb_cache[tb_name] = tb;
 					}
@@ -62,7 +56,7 @@ void TB_Reader::init(const string& tb_path, bool load_all)
 void TB_Reader::print_EGTB_info()
 {
 	size_t num = 0;
-	stringstream ss;
+	std::stringstream ss;
 	for (const auto& [tb_name, tb] : tb_cache)
 	{
 		if (tb == nullptr)
@@ -70,26 +64,26 @@ void TB_Reader::print_EGTB_info()
 		else
 			num++;
 	}
-	cout << "info string EGTB " << num << " of " << tb_cache.size();
+	std::cout << "info string EGTB " << num << " of " << tb_cache.size();
 	if (num != tb_cache.size())
 	{
-		cout << ". Deleted: ";
-		string str_del = ss.str();
-		cout << str_del.substr(0, str_del.length() - 2);
+		std::cout << ". Deleted: ";
+		std::string str_del = ss.str();
+		std::cout << str_del.substr(0, str_del.length() - 2);
 	}
-	cout << endl;
+	std::cout << std::endl;
 }
 
-void TB_Reader::discard_tb(const string& tb_name)
+void TB_Reader::discard_tb(const std::string& tb_name)
 {
 	tb_cache[tb_name] = nullptr;
 }
 
-TB_Reader::TB_Reader(const string& tb_name)
+TB_Reader::TB_Reader(const std::string& tb_name)
 {
 	this->tb_name = tb_name;
 	/// Pawn TB?
-	this->has_pawns = (tb_name.find('P') != string::npos);
+	this->has_pawns = (tb_name.find('P') != std::string::npos);
 	/// Is symmetrical
 	this->is_symmetrical = (tb_name.length() % 2 == 1);
 	if (is_symmetrical)
@@ -104,7 +98,7 @@ TB_Reader::TB_Reader(const string& tb_name)
 		}
 	}
 	/// Compression file
-	fs::path path = egtb_path / (tb_name + file_extension_compressed);
+	auto path = egtb_path / (tb_name + file_extension_compressed);
 	//wstring_convert<codecvt_utf8_utf16<wchar_t>, wchar_t> convert;
 	//string utf8_string = convert.to_bytes(path);
 	//this->tb_path = path.generic_string();
@@ -114,7 +108,7 @@ TB_Reader::TB_Reader(const string& tb_name)
 	this->size = 0;
 	this->size2 = 0;
 	/// Idx
-	vector<char> idx_data(MAX_IDX_SIZE);
+	std::vector<char> idx_data(MAX_IDX_SIZE);
 	if (dz_is_open(dz_header))
 	{
 		auto length = dz_get_orig_length(dz_header);
@@ -140,11 +134,11 @@ TB_Reader::~TB_Reader()
 	dz_close(this->dz_header);
 }
 
-void TB_Reader::init_idx(const vector<char>& idx_data)
+void TB_Reader::init_idx(const std::vector<char>& idx_data)
 {
-	this->tbtable = make_shared<TBTable>(tb_name, idx_data.data());
+	this->tbtable = std::make_shared<TBTable>(tb_name, idx_data.data());
 	if (tbtable->header_size == 0 || tbtable->header_size > MAX_IDX_SIZE) {
-		stringstream ss;
+		std::stringstream ss;
 		ss << "wrong idx data size: " << tbtable->header_size;
 		error(ss.str());
 	}
@@ -173,7 +167,7 @@ uint16_t TB_Reader::read_flags(DZ_Header header, bool is_compressed) const
 	return flags;
 }
 
-tuple<size_t, bool> TB_Reader::board_to_index(const Position& board) const
+std::tuple<size_t, bool> TB_Reader::board_to_index(const Position& board) const
 {
 	bool is_ep = is_ep_position(board);
 	size_t key = board_to_key(board, is_ep);
@@ -238,7 +232,7 @@ val_dtz TB_Reader::read_one(size_t key, bool is_compressed)
 	char tb_bytes[3];
 	assert(sizeof(tb_bytes) >= num_bytes);
 	{
-		lock_guard<mutex> lock(mtx_dz);
+		std::lock_guard<std::mutex> lock(mtx_dz);
 		if (tbtable->header_size + i + num_bytes > dz_get_orig_length(dz_header))
 			error("read_one: wrong size");
 		if ((num_bytes > 1) && (tb_flags & EGTB_VAL_DTZ_SEPARATED)) {
@@ -265,7 +259,7 @@ val_dtz TB_Reader::read_one(size_t key, bool is_compressed)
 		}
 	}
 	auto val_dtz = load_one(tb_bytes, is_compressed, val_big);
-	if ((tb_flags & EGTB_DTZ101_AS_DRAW) && get<uint8_t>(val_dtz) >= DTZ_MAX)
+	if ((tb_flags & EGTB_DTZ101_AS_DRAW) && std::get<uint8_t>(val_dtz) >= DTZ_MAX)
 		error("read_one: DTZ > 100");
 	return val_dtz;
 }
@@ -315,12 +309,12 @@ val_dtz TB_Reader::probe_one(Position& board)
 			if (is_capture_or_promotion)
 			{
 				bool is_error;
-				tie(is_error, val, dtz) = probe_tb(board);
+				std::tie(is_error, val, dtz) = probe_tb(board);
 				dtz = 1;
 			}
 			else
 			{
-				tie(val, dtz) = probe_one(board);
+				std::tie(val, dtz) = probe_one(board);
 				if (is_zeroing)
 					dtz = 1;
 				else
@@ -333,7 +327,7 @@ val_dtz TB_Reader::probe_one(Position& board)
 			return { val, dtz };
 		}
 	}
-	
+
 	auto [index, is_ep] = board_to_index(board);
 	if (is_ep)
 		error("probing an ep position");
@@ -341,20 +335,20 @@ val_dtz TB_Reader::probe_one(Position& board)
 	return read_one(index);
 }
 
-tuple<bool, int16_t, uint8_t> TB_Reader::probe_tb(Position& board)
+std::tuple<bool, int16_t, uint8_t> TB_Reader::probe_tb(Position& board)
 {
 	if (is_anti_win(board))
 		return { false, 0, 0 };
 	assert(!is_anti_loss(board));
 
-	string tb_name = board_to_name(board);
+	std::string tb_name = board_to_name(board);
 	auto it_tb = tb_cache.find(tb_name);
-	shared_ptr<TB_Reader> p_tb;
+	std::shared_ptr<TB_Reader> p_tb;
 	if (it_tb == tb_cache.end())
 	{
 		if (!auto_load)
 			return { true, 0, 0 };
-		auto next_tb = make_shared<TB_Reader>(tb_name);
+		auto next_tb = std::make_shared<TB_Reader>(tb_name);
 		if (!next_tb->is_dz_open()) {
 			discard_tb(tb_name);
 			return { true, 0, 0 };
@@ -379,14 +373,14 @@ tuple<bool, int16_t, uint8_t> TB_Reader::probe_tb(Position& board)
 		auto [val, dtz] = p_tb->probe_one(board);
 		return { false, val, dtz };
 	}
-	catch (const exception&)
+	catch (const std::exception&)
 	{
 		discard_tb(tb_name);
 		return { true, 0, 0 };
 	}
 }
 
-tuple<bool, int16_t, uint8_t> TB_Reader::probe_ep(Position& board)
+std::tuple<bool, int16_t, uint8_t> TB_Reader::probe_ep(Position& board)
 {
 	if (is_anti_end(board))
 		error("probe_ep: is_anti_end for " + board.fen());
@@ -397,9 +391,9 @@ tuple<bool, int16_t, uint8_t> TB_Reader::probe_ep(Position& board)
 	MoveList<LEGAL> moves(board);
 	if (moves.size() == 0)
 		error("probe_ep: no moves for " + board.fen());
-	vector<int16_t> vals(moves.size(), NONE);
-	vector<uint8_t> dtzs(moves.size(), 0);
-	static const int None = numeric_limits<int>::max();
+	std::vector<int16_t> vals(moves.size(), NONE);
+	std::vector<uint8_t> dtzs(moves.size(), 0);
+	static const int None = std::numeric_limits<int>::max();
 	size_t i = 0;
 	for (const auto& move_i : moves)
 	{
@@ -409,14 +403,8 @@ tuple<bool, int16_t, uint8_t> TB_Reader::probe_ep(Position& board)
 		bool is_zeroing = is_capture || type_of(board.moved_piece(m)) == PAWN;
 		StateInfo st;
 		board.do_move(m, st);
-#ifdef USE_FAIRY_SF
-		Value res = get_anti_res(board);
-		bool is_loss = (res == -VALUE_MATE);
-		bool is_win = !is_loss && (res == VALUE_MATE || MoveList<LEGAL>(board).size() == 0);
-#else
 		bool is_win = is_anti_win(board);
 		bool is_loss = !is_win && board.is_anti_loss();
-#endif
 		if (is_loss)
 		{
 			val = 1;
@@ -434,14 +422,14 @@ tuple<bool, int16_t, uint8_t> TB_Reader::probe_ep(Position& board)
 			if (is_capture_or_promotion)
 			{
 				bool is_error;
-				tie(is_error, val, dtz) = probe_tb(board);
+				std::tie(is_error, val, dtz) = probe_tb(board);
 				if (is_error)
 					return { true, 0, 0 };
 				dtz = 1;
 			}
 			else
 			{
-				tie(val, dtz) = probe_one(board);
+				std::tie(val, dtz) = probe_one(board);
 				if (is_zeroing)
 					dtz = 1;
 				else
@@ -527,18 +515,18 @@ tuple<bool, int16_t, uint8_t> TB_Reader::probe_ep(Position& board)
 bool TB_Reader::probe_EGTB(Position& board, int16_t& val, uint8_t& dtz)
 {
 	bool is_error;
-	tie(is_error, val, dtz) = probe_tb(board);
+	std::tie(is_error, val, dtz) = probe_tb(board);
 	return is_error;
 }
 
-void TB_Reader::error(const string& text, bool throw_exception) const
+void TB_Reader::error(const std::string& text, bool throw_exception) const
 {
-	stringstream ss;
+	std::stringstream ss;
 	ss << "ERROR in " << tb_name << ": " << text;
-	string str_err = ss.str();
-	cerr << str_err << endl;
+	std::string str_err = ss.str();
+	std::cerr << str_err << std::endl;
 	if (throw_exception)
-		throw runtime_error(str_err);
+		throw std::runtime_error(str_err);
 }
 
-} // namespace egtb
+} // namespace AntichessTb

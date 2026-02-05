@@ -79,6 +79,9 @@
 #  define pext(b, m) 0
 #endif
 
+
+namespace AntichessTb {
+
 #ifdef USE_POPCNT
 constexpr bool HasPopCnt = true;
 #else
@@ -944,6 +947,8 @@ inline Variant main_variant(Variant v) {
       return CHESS_VARIANT; // Silence a warning
   }
 }
+
+} // namespace AntichessTb
 
 #endif // #ifndef TYPES_H_INCLUDED
 

@@ -33,14 +33,14 @@
 #include "uci.h"
 #include "syzygy/tbprobe.h"
 
-using namespace std;
+namespace AntichessTb {
 
-extern vector<string> setup_bench(const Position&, istream&);
+extern std::vector<std::string> setup_bench(const Position&, std::istream&);
 
 namespace {
 
   // FEN strings of the initial positions
-  const string StartFENs[SUBVARIANT_NB] = {
+  const std::string StartFENs[SUBVARIANT_NB] = {
   "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
 #ifdef ANTI
   "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w - - 0 1",
@@ -119,10 +119,10 @@ namespace {
   // or the starting position ("startpos") and then makes the moves given in the
   // following move list ("moves").
 
-  void position(Position& pos, istringstream& is, StateListPtr& states) {
+  void position(Position& pos, std::istringstream& is, StateListPtr& states) {
 
     Move m;
-    string token, fen;
+    std::string token, fen;
 
     Variant variant = UCI::variant_from_name(Options["UCI_Variant"]);
 
@@ -169,9 +169,9 @@ namespace {
   // setoption() is called when engine receives the "setoption" UCI command. The
   // function updates the UCI option ("name") to the given value ("value").
 
-  void setoption(istringstream& is) {
+  void setoption(std::istringstream& is) {
 
-    string token, name, value;
+    std::string token, name, value;
     is >> token; // Consume "name" token
 
     // Read option name (can contain spaces)
@@ -188,7 +188,7 @@ namespace {
         std::transform(name.begin(), name.end(), name.begin(), ::tolower);
         if (name == "uci_variant") {
             Variant variant = UCI::variant_from_name(value);
-            sync_cout << "info string variant " << (string)Options["UCI_Variant"] << " startpos " << StartFENs[variant] << sync_endl;
+            sync_cout << "info string variant " << (std::string)Options["UCI_Variant"] << " startpos " << StartFENs[variant] << sync_endl;
             Tablebases::init(variant, Options["SyzygyPath"]);
         }
     }
@@ -201,10 +201,10 @@ namespace {
   // the thinking time and other parameters from the input string, then starts
   // the search.
 
-  void go(Position& pos, istringstream& is, StateListPtr& states) {
+  void go(Position& pos, std::istringstream& is, StateListPtr& states) {
 
     Search::LimitsType limits;
-    string token;
+    std::string token;
     bool ponderMode = false;
 
     limits.startTime = now(); // As early as possible!
@@ -235,24 +235,24 @@ namespace {
   // a list of UCI commands is setup according to bench parameters, then
   // it is run one by one printing a summary at the end.
 
-  void bench(Position& pos, istream& args, StateListPtr& states) {
+  void bench(Position& pos, std::istream& args, StateListPtr& states) {
 
-    string token;
+    std::string token;
     uint64_t num, nodes = 0, cnt = 1;
 
-    vector<string> list = setup_bench(pos, args);
-    num = count_if(list.begin(), list.end(), [](string s) { return s.find("go ") == 0 || s.find("eval") == 0; });
+    std::vector<std::string> list = setup_bench(pos, args);
+    num = count_if(list.begin(), list.end(), [](std::string s) { return s.find("go ") == 0 || s.find("eval") == 0; });
 
     TimePoint elapsed = now();
 
     for (const auto& cmd : list)
     {
-        istringstream is(cmd);
-        is >> skipws >> token;
+        std::istringstream is(cmd);
+        is >> std::skipws >> token;
 
         if (token == "go" || token == "eval")
         {
-            cerr << "\nPosition: " << cnt++ << '/' << num << " (" << pos.fen() << ")" << endl;
+            std::cerr << "\nPosition: " << cnt++ << '/' << num << " (" << pos.fen() << ")" << std::endl;
             if (token == "go")
             {
                go(pos, is, states);
@@ -271,10 +271,10 @@ namespace {
 
     dbg_print(); // Just before exiting
 
-    cerr << "\n==========================="
+    std::cerr << "\n==========================="
          << "\nTotal time (ms) : " << elapsed
          << "\nNodes searched  : " << nodes
-         << "\nNodes/second    : " << 1000 * nodes / elapsed << endl;
+         << "\nNodes/second    : " << 1000 * nodes / elapsed << std::endl;
   }
 
   // The win rate model returns the probability (per mille) of winning given an eval
@@ -311,7 +311,7 @@ namespace {
 void UCI::loop(int argc, char* argv[]) {
 
   Position pos;
-  string token, cmd;
+  std::string token, cmd;
   StateListPtr states(new std::deque<StateInfo>(1));
 
   pos.set(StartFENs[CHESS_VARIANT], false, CHESS_VARIANT, &states->back(), Threads.main());
@@ -320,13 +320,13 @@ void UCI::loop(int argc, char* argv[]) {
       cmd += std::string(argv[i]) + " ";
 
   do {
-      if (argc == 1 && !getline(cin, cmd)) // Block here waiting for input or EOF
+      if (argc == 1 && !std::getline(std::cin, cmd)) // Block here waiting for input or EOF
           cmd = "quit";
 
-      istringstream is(cmd);
+      std::istringstream is(cmd);
 
       token.clear(); // Avoid a stale if getline() returns empty or blank line
-      is >> skipws >> token;
+      is >> std::skipws >> token;
 
       if (    token == "quit"
           ||  token == "stop")
@@ -371,11 +371,11 @@ void UCI::loop(int argc, char* argv[]) {
 /// mate <y>  Mate in y moves, not plies. If the engine is getting mated
 ///           use negative values for y.
 
-string UCI::value(Value v) {
+std::string UCI::value(Value v) {
 
   assert(-VALUE_INFINITE < v && v < VALUE_INFINITE);
 
-  stringstream ss;
+  std::stringstream ss;
 
   if (abs(v) < VALUE_MATE_IN_MAX_PLY)
       ss << "cp " << v * 100 / PawnValueEg;
@@ -389,9 +389,9 @@ string UCI::value(Value v) {
 /// UCI::wdl() report WDL statistics given an evaluation and a game ply, based on
 /// data gathered for fishtest LTC games.
 
-string UCI::wdl(Value v, int ply) {
+std::string UCI::wdl(Value v, int ply) {
 
-  stringstream ss;
+  std::stringstream ss;
 
   int wdl_w = win_rate_model( v, ply);
   int wdl_l = win_rate_model(-v, ply);
@@ -414,7 +414,7 @@ std::string UCI::square(Square s) {
 /// normal chess mode, and in e1h1 notation in chess960 mode. Internally all
 /// castling moves are always encoded as 'king captures rook'.
 
-string UCI::move(Move m, bool chess960) {
+std::string UCI::move(Move m, bool chess960) {
 
   Square from = from_sq(m);
   Square to = to_sq(m);
@@ -429,9 +429,9 @@ string UCI::move(Move m, bool chess960) {
       to = make_square(to > from ? FILE_G : FILE_C, rank_of(from));
 
 #ifdef CRAZYHOUSE
-  string move = ((type_of(m) == DROP) ? std::string{" PNBRQK  PNBRQK "[dropped_piece(m)], '@'} : UCI::square(from)) + UCI::square(to);
+  std::string move = ((type_of(m) == DROP) ? std::string{" PNBRQK  PNBRQK "[dropped_piece(m)], '@'} : UCI::square(from)) + UCI::square(to);
 #else
-  string move = UCI::square(from) + UCI::square(to);
+  std::string move = UCI::square(from) + UCI::square(to);
 #endif
 
   if (type_of(m) == PROMOTION)
@@ -444,7 +444,7 @@ string UCI::move(Move m, bool chess960) {
 /// UCI::to_move() converts a string representing a move in coordinate notation
 /// (g1f3, a7a8q) to the corresponding legal Move, if any.
 
-Move UCI::to_move(const Position& pos, string& str) {
+Move UCI::to_move(const Position& pos, std::string& str) {
 
   if (str.length() == 5) // Junior could send promotion piece in uppercase
       str[4] = char(tolower(str[4]));
@@ -457,7 +457,7 @@ Move UCI::to_move(const Position& pos, string& str) {
 }
 
 
-Variant UCI::variant_from_name(const string& str) {
+Variant UCI::variant_from_name(const std::string& str) {
 
   for (Variant v = CHESS_VARIANT; v < SUBVARIANT_NB; ++v)
       if (variants[v] == str)
@@ -465,3 +465,5 @@ Variant UCI::variant_from_name(const string& str) {
 
   return CHESS_VARIANT;
 }
+
+} // namespace AntichessTb

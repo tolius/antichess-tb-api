@@ -21,6 +21,8 @@
 #include "movegen.h"
 #include "position.h"
 
+namespace AntichessTb {
+
 namespace {
 
   template<Variant V, GenType Type, Direction D>
@@ -923,3 +925,5 @@ ExtMove* generate<LEGAL>(const Position& pos, ExtMove* moveList) {
 
   return moveList;
 }
+
+} // namespace AntichessTb

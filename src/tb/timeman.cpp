@@ -24,6 +24,9 @@
 #include "timeman.h"
 #include "uci.h"
 
+
+namespace AntichessTb {
+
 TimeManagement Time; // Our global time management object
 
 constexpr int MoveHorizon[VARIANT_NB] = { // Plan time management at most this many moves ahead
@@ -131,3 +134,5 @@ void TimeManagement::init(Variant var, Search::LimitsType& limits, Color us, int
   if (Options["Ponder"])
       optimumTime += optimumTime / 4;
 }
+
+} // namespace AntichessTb

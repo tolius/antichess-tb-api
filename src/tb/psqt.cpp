@@ -21,7 +21,7 @@
 #include "types.h"
 #include "bitboard.h"
 
-namespace PSQT {
+namespace AntichessTb::PSQT {
 
 #define S(mg, eg) make_score(mg, eg)
 
@@ -840,4 +840,4 @@ for (Variant var = CHESS_VARIANT; var < VARIANT_NB; ++var)
   }
 }
 
-} // namespace PSQT
+} // namespace AntichessTb::PSQT

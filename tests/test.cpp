@@ -13,13 +13,13 @@
 #include <charconv>
 
 
-using namespace std;
+using namespace AntichessTb;
 
 
 int tests()
 {
 	constexpr size_t MAX_CARDINALITY = 4;
-	using Test = tuple<string, int16_t, int>;
+	using Test = std::tuple<std::string, int16_t, int>;
 	auto tests = {
 		Test("7k/8/5K2/8/8/1R6/P7/8 w - - 0 1",    50,  0),
 		Test("8/8/8/8/8/3k4/8/1R6 b - - 0 1",     -35,  0),
@@ -67,17 +67,17 @@ int tests()
 			pieces[color][num_pieces] = piece;
 			num_pieces++;
 		}
-		cout << "Test " << setw(40) << left << fen << ": ";
-		int res = antichess_tb_probe_dtw(squares[WHITE], pieces[WHITE], num_white_pieces, 
-		                                 squares[BLACK], pieces[BLACK], num_black_pieces, 
+		std::cout << "Test " << std::setw(40) << std::left << fen << ": ";
+		int res = antichess_tb_probe_dtw(squares[WHITE], pieces[WHITE], num_white_pieces,
+		                                 squares[BLACK], pieces[BLACK], num_black_pieces,
 		                                 pos.side_to_move(), pos.ep_square(), &dtw);
 		if (res != ec)
-			cout << "Error code " << ec << " != " << res << " --> ERROR";
+			std::cout << "Error code " << ec << " != " << res << " --> ERROR";
 		else if (dtw != dtw_res)
-			cout << "DTW " << dtw << " != " << dtw_res << " --> ERROR";
+			std::cout << "DTW " << dtw << " != " << dtw_res << " --> ERROR";
 		else
-			cout << "PASSED";
-		cout << endl;
+			std::cout << "PASSED";
+		std::cout << std::endl;
 		if (res != ec || dtw != dtw_res)
 			is_error = true;
 	}
@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
 {
 	if (argc < 2)
 		return -101;
-	string egtb_path = argv[1];
+	std::string egtb_path = argv[1];
 
 	int res_init = antichess_tb_init();
 	if (res_init != 0)

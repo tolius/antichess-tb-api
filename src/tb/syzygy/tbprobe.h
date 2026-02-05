@@ -23,7 +23,7 @@
 
 #include "../search.h"
 
-namespace Tablebases {
+namespace AntichessTb::Tablebases {
 
 enum WDLScore {
     WDLLoss        = -2, // Loss
@@ -75,6 +75,6 @@ inline std::ostream& operator<<(std::ostream& os, const ProbeState v) {
     return os;
 }
 
-}
+} // namespace AntichessTb::Tablebases
 
 #endif

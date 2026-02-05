@@ -29,7 +29,7 @@
 #include "uci.h"
 #include "syzygy/tbprobe.h"
 
-using std::string;
+namespace AntichessTb {
 
 UCI::OptionsMap Options; // Global object
 
@@ -47,7 +47,7 @@ void on_eval_file(const Option& ) { Eval::NNUE::init(); }
 #endif
 
 /// Our case insensitive less() function as required by UCI protocol
-bool CaseInsensitiveLess::operator() (const string& s1, const string& s2) const {
+bool CaseInsensitiveLess::operator() (const std::string& s1, const std::string& s2) const {
 
   return std::lexicographical_compare(s1.begin(), s1.end(), s2.begin(), s2.end(),
          [](char c1, char c2) { return tolower(c1) < tolower(c2); });
@@ -105,7 +105,7 @@ std::ostream& operator<<(std::ostream& os, const OptionsMap& om) {
                   os << " default " << o.defaultValue;
 
               if (o.type == "combo")
-                  for (string value : o.comboValues)
+                  for (std::string value : o.comboValues)
                       os << " var " << value;
 
               if (o.type == "spin")
@@ -169,7 +169,7 @@ void Option::operator<<(const Option& o) {
 /// the GUI to check for option's limits, but we could receive the new value
 /// from the user by console window, so let's check the bounds anyway.
 
-Option& Option::operator=(const string& v) {
+Option& Option::operator=(const std::string& v) {
 
   assert(!type.empty());
 
@@ -181,7 +181,7 @@ Option& Option::operator=(const string& v) {
   if (type == "combo")
   {
       OptionsMap comboMap; // To have case insensitive compare
-      string token;
+      std::string token;
       std::istringstream ss(defaultValue);
       while (ss >> token)
           comboMap[token] << Option();
@@ -201,3 +201,4 @@ Option& Option::operator=(const string& v) {
 }
 
 } // namespace UCI
+} // namespace AntichessTb

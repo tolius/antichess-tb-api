@@ -22,7 +22,7 @@
 #include "material.h"
 #include "thread.h"
 
-using namespace std;
+namespace AntichessTb {
 
 namespace {
 
@@ -638,3 +638,4 @@ Entry* probe(const Position& pos) {
 }
 
 } // namespace Material
+} // namespace AntichessTb

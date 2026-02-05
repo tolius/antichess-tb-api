@@ -13,11 +13,10 @@
 #include <string>
 
 
-using namespace std;
-using namespace egtb;
+using namespace AntichessTb;
 
 
-namespace PSQT {
+namespace AntichessTb::PSQT {
 	void init();
 }
 
@@ -48,7 +47,7 @@ int antichess_tb_add_path(const char* path, size_t path_len)
 {
 	try
 	{
-		string egtb_path(path, path_len);
+		std::string egtb_path(path, path_len);
 		Tablebases::init(ANTI_VARIANT, egtb_path);
 		TB_Reader::init(egtb_path, true);
 		size_t num_files = TB_Reader::tb_cache.size();
@@ -109,7 +108,7 @@ int antichess_tb_probe_dtw(const int* white_squares, const int* white_pieces, si
 		if (is_error)
 			return -5;
 
-		if (abs(tb_val) >= egtb::DRAW)
+		if (abs(tb_val) >= AntichessTb::DRAW)
 		{
 			*dtw = 0;
 			return 2;

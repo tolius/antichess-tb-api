@@ -23,6 +23,9 @@
 
 #include "types.h"
 
+
+namespace AntichessTb {
+
 class Position;
 
 enum GenType {
@@ -69,5 +72,7 @@ struct MoveList {
 private:
   ExtMove moveList[MAX_MOVES], *last;
 };
+
+} // namespace AntichessTb
 
 #endif // #ifndef MOVEGEN_H_INCLUDED
