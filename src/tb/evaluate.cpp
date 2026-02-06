@@ -54,7 +54,8 @@
 #endif
 
 
-using namespace std;
+namespace AntichessTb {
+
 #ifdef USE_NNUE
 using namespace Eval::NNUE;
 
@@ -1801,7 +1802,7 @@ namespace {
                                                         : pos.count<BISHOP>(WHITE) + pos.count<KNIGHT>(WHITE));
         else
             sf = std::min(sf, 36 + 7 * pos.count<PAWN>(strongSide)) - 4 * !pawnsOnBothFlanks;
-      
+
         sf -= 4 * !pawnsOnBothFlanks;
     }
 
@@ -2027,3 +2028,5 @@ std::string Eval::trace(const Position& pos) {
 
   return ss.str();
 }
+
+} // namespace AntichessTb

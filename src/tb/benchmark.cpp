@@ -25,11 +25,12 @@
 #include "position.h"
 #include "uci.h"
 
-using namespace std;
+
+namespace AntichessTb {
 
 namespace {
 
-const vector<string> Defaults[SUBVARIANT_NB] = {
+const std::vector<std::string> Defaults[SUBVARIANT_NB] = {
   {
   "setoption name UCI_Variant value chess",
   "setoption name UCI_Chess960 value false",
@@ -409,12 +410,12 @@ const vector<string> Defaults[SUBVARIANT_NB] = {
 /// bench 64 1 100000 default nodes -> search default positions for 100K nodes each
 /// bench 16 1 5 default perft -> run a perft 5 on default positions
 
-vector<string> setup_bench(const Position& current, istream& is) {
+std::vector<std::string> setup_bench(const Position& current, std::istream& is) {
 
-  vector<string> fens, list;
-  string go, token, varname;
+  std::vector<std::string> fens, list;
+  std::string go, token, varname;
 
-  streampos args = is.tellg();
+  std::streampos args = is.tellg();
   // Check whether the next token is a variant name
   if ((is >> token) && (std::find(variants.begin(), variants.end(), token) != variants.end() || token == "all"))
   {
@@ -424,18 +425,18 @@ vector<string> setup_bench(const Position& current, istream& is) {
   else
   {
       is.seekg(args);
-      varname = string(Options["UCI_Variant"]);
+      varname = std::string(Options["UCI_Variant"]);
   }
   Variant variant = varname == "all" ? CHESS_VARIANT : UCI::variant_from_name(varname);
 
   do {
   // Assign default values to missing arguments
-  string ttSize    = (is >> token) ? token : "16";
-  string threads   = (is >> token) ? token : "1";
-  string limit     = (is >> token) ? token : (variant == CHESS_VARIANT ? "13" : "12");
-  string fenFile   = (is >> token) ? token : "default";
-  string limitType = (is >> token) ? token : "depth";
-  string evalType  = (is >> token) ? token : "mixed";
+  std::string ttSize    = (is >> token) ? token : "16";
+  std::string threads   = (is >> token) ? token : "1";
+  std::string limit     = (is >> token) ? token : (variant == CHESS_VARIANT ? "13" : "12");
+  std::string fenFile   = (is >> token) ? token : "default";
+  std::string limitType = (is >> token) ? token : "depth";
+  std::string evalType  = (is >> token) ? token : "mixed";
 
   go = limitType == "eval" ? "eval" : "go " + limitType + " " + limit;
 
@@ -447,16 +448,16 @@ vector<string> setup_bench(const Position& current, istream& is) {
 
   else
   {
-      string fen;
-      ifstream file(fenFile);
+      std::string fen;
+      std::ifstream file(fenFile);
 
       if (!file.is_open())
       {
-          cerr << "Unable to open file " << fenFile << endl;
+          std::cerr << "Unable to open file " << fenFile << std::endl;
           exit(EXIT_FAILURE);
       }
 
-      while (getline(file, fen))
+      while (std::getline(file, fen))
           if (!fen.empty())
               fens.push_back(fen);
 
@@ -470,11 +471,11 @@ vector<string> setup_bench(const Position& current, istream& is) {
 
   size_t posCounter = 0;
 
-  for (const string& fen : fens)
-      if (fen.find("setoption") != string::npos)
+  for (const std::string& fen : fens)
+      if (fen.find("setoption") != std::string::npos)
       {
           list.emplace_back(fen);
-          if (fen.find("setoption name UCI_Variant") != string::npos)
+          if (fen.find("setoption name UCI_Variant") != std::string::npos)
               posCounter = 0;
       }
       else
@@ -495,3 +496,5 @@ vector<string> setup_bench(const Position& current, istream& is) {
 
   return list;
 }
+
+} // namespace AntichessTb

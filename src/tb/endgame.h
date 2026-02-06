@@ -29,6 +29,8 @@
 #include "types.h"
 
 
+namespace AntichessTb {
+
 /// EndgameCode lists all supported endgame functions by corresponding codes
 
 enum EndgameCode {
@@ -130,5 +132,7 @@ namespace Endgames {
     return it != map<T>().end() ? it->second.get() : nullptr;
   }
 }
+
+} // namespace AntichessTb
 
 #endif // #ifndef ENDGAME_H_INCLUDED

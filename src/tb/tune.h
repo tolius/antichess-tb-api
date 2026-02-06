@@ -24,6 +24,9 @@
 #include <type_traits>
 #include <vector>
 
+
+namespace AntichessTb {
+
 typedef std::pair<int, int> Range; // Option's min-max values
 typedef Range (RangeFun) (int);
 
@@ -189,5 +192,7 @@ public:
 #define CONDITION(x) (Conditions.binary[__COUNTER__] || (x))
 #define TUNE_CONDITIONS() int UNIQUE(c, __LINE__) = (Conditions.init(__COUNTER__), 0); \
                           TUNE(Conditions, set_conditions)
+
+} // namespace AntichessTb
 
 #endif // #ifndef TUNE_H_INCLUDED

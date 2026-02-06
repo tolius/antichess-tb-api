@@ -34,6 +34,8 @@
 #endif
 
 
+namespace AntichessTb {
+
 /// StateInfo struct stores information needed to restore a Position object to
 /// its previous state when we retract a move. Whenever a move is made on the
 /// board (by calling Position::do_move), a StateInfo object must be passed.
@@ -1286,5 +1288,7 @@ inline void StateInfo::reset()
   std::memset(this, 0, sizeof(StateInfo));
   epSquare = SQ_NONE;
 }
+
+} // namespace AntichessTb
 
 #endif // #ifndef POSITION_H_INCLUDED

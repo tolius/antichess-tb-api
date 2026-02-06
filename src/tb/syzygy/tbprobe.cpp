@@ -50,6 +50,9 @@
 #include <windows.h>
 #endif
 
+
+namespace AntichessTb {
+
 using namespace Tablebases;
 
 int Tablebases::MaxCardinality;
@@ -2511,3 +2514,5 @@ bool Tablebases::root_probe_wdl(Position& pos, Search::RootMoves& rootMoves) {
 
     return true;
 }
+
+} // namespace AntichessTb

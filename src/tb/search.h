@@ -25,6 +25,9 @@
 #include "movepick.h"
 #include "types.h"
 
+
+namespace AntichessTb {
+
 class Position;
 
 namespace Search {
@@ -105,5 +108,6 @@ void init();
 void clear();
 
 } // namespace Search
+} // namespace AntichessTb
 
 #endif // #ifndef SEARCH_H_INCLUDED

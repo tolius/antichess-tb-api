@@ -23,6 +23,9 @@
 
 #include "types.h"
 
+
+namespace AntichessTb {
+
 namespace Bitbases {
 
 void init();
@@ -446,6 +449,8 @@ inline Square frontmost_sq(Color c, Bitboard b) {
 inline Square backmost_sq(Color c, Bitboard b) {
   return c == WHITE ? lsb(b) : msb(b);
 }
-#endif // #ifndef BITBOARD_H_INCLUDED
+#endif
+
+} // namespace AntichessTb
 
 #endif // #ifndef BITBOARD_H_INCLUDED

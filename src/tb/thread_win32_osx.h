@@ -31,6 +31,8 @@
 
 #include <pthread.h>
 
+namespace AntichessTb {
+
 static const size_t TH_STACK_SIZE = 8 * 1024 * 1024;
 
 template <class T, class P = std::pair<T*, void(T::*)()>>
@@ -57,9 +59,15 @@ public:
   void join() { pthread_join(thread, NULL); }
 };
 
+} // namespace AntichessTb
+
 #else // Default case: use STL classes
 
+namespace AntichessTb {
+
 typedef std::thread NativeThread;
+
+} // namespace AntichessTb
 
 #endif
 

@@ -23,6 +23,9 @@
 
 #include "types.h"
 
+
+namespace AntichessTb {
+
 class Position;
 
 namespace Eval {
@@ -50,5 +53,6 @@ namespace Eval {
 #endif
 
 } // namespace Eval
+} // namespace AntichessTb
 
 #endif // #ifndef EVALUATE_H_INCLUDED

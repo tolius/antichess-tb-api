@@ -1,21 +1,16 @@
 #include "elements.h"
 
 #include "../syzygy/tbprobe.h"
-//#include "../thread.h"
 
-#include <iostream>
-#include <locale>
 #include <sstream>
 #include <array>
 
-using namespace std;
+namespace AntichessTb {
 
-namespace egtb
+std::string board_to_name(const Position& pos)
 {
-string board_to_name(const Position& pos)
-{
-	stringstream white;
-	stringstream black;
+	std::stringstream white;
+	std::stringstream black;
 	Color lead_color = COLOR_NB;  // COLOR_NB for symmetrical positions
 	for (size_t i = PIECE_TYPES.size() - 1; i > 0; i--)
 	{
@@ -24,21 +19,13 @@ string board_to_name(const Position& pos)
 		int num_white = popcount(pieces);
 		for (int j = 0; j < num_white; j++)
 		{
-#ifdef USE_FAIRY_SF
-			white << pos.variant()->pieceToChar[piece_type];
-#else
 			white << PIECE_SYMBOLS[i];
-#endif
 		}
 		pieces = pos.pieces(BLACK, piece_type);
 		int num_black = popcount(pieces);
 		for (int j = 0; j < num_black; j++)
 		{
-#ifdef USE_FAIRY_SF
-			black << pos.variant()->pieceToChar[piece_type];
-#else
 			black << PIECE_SYMBOLS[i];
-#endif
 		}
 		if (lead_color == COLOR_NB)
 		{
@@ -48,8 +35,8 @@ string board_to_name(const Position& pos)
 				lead_color = BLACK;
 		}
 	}
-	string str_white = white.str();
-	string str_black = black.str();
+	std::string str_white = white.str();
+	std::string str_black = black.str();
 	if (str_white.length() > str_black.length())
 		lead_color = WHITE;
 	else if (str_black.length() > str_white.length())
@@ -92,30 +79,6 @@ bool is_ep_position(const Position& pos)
 		return false;
 }
 
-#ifdef USE_FAIRY_SF
-Value get_anti_res(const Position& pos)
-{
-	Value res = VALUE_NONE;
-	pos.is_immediate_game_end(res);
-	return res;
-}
-bool is_anti_win(const Position& pos)
-{
-	Value res = get_anti_res(pos);
-	return res == VALUE_MATE || MoveList<LEGAL>(pos).size() == 0;
-}
-bool is_anti_loss(const Position& pos)
-{
-	Value res = get_anti_res(pos);
-	return res == -VALUE_MATE;
-}
-bool is_anti_end(const Position& pos)
-{
-	//return pos.is_immediate_game_end(); --> doesn't detect stalemates
-	Value res = get_anti_res(pos);
-	return res == VALUE_MATE || res == -VALUE_MATE || MoveList<LEGAL>(pos).size() == 0;
-}
-#else
 inline bool is_anti_win(const Position& pos)
 {
 	return pos.is_anti_win() || MoveList<LEGAL>(pos).size() == 0;
@@ -128,6 +91,5 @@ bool is_anti_end(const Position& pos)
 {
 	return is_anti_win(pos) || pos.is_anti_loss();
 }
-#endif // USE_FAIRY_SF
 
-}
+} // namespace AntichessTb

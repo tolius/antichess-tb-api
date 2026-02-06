@@ -29,9 +29,7 @@
 #include <string>
 
 
-#ifdef USE_FAIRY_SF
-using namespace Stockfish;
-#endif
+namespace AntichessTb {
 
 // struct PairsData contains low level indexing information to access TB data.
 // There are 8, 4 or 2 PairsData records for each TBTable, according to type of
@@ -49,11 +47,7 @@ struct PairsData
 struct TBTable
 {
     static constexpr int Sides = 2;
-#ifdef USE_FAIRY_SF
-    static constexpr std::string_view variant = "antichess";
-#else
     static constexpr Variant variant = ANTI_VARIANT;
-#endif
 
     Key key;
     Key key2;
@@ -80,5 +74,7 @@ struct TBTable
 };
 
 void Tablebases_init();
+
+} // namespace AntichessTb
 
 #endif

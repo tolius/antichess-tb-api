@@ -27,6 +27,9 @@
 #include "position.h"
 #include "types.h"
 
+
+namespace AntichessTb {
+
 /// StatsEntry stores the stat table value. It is usually a number but could
 /// be a move or even a nested history. We use a class instead of naked value
 /// to directly call history update operator<<() on the entry so to use stats
@@ -155,5 +158,7 @@ private:
   int ply;
   ExtMove moves[MAX_MOVES];
 };
+
+} // namespace AntichessTb
 
 #endif // #ifndef MOVEPICK_H_INCLUDED

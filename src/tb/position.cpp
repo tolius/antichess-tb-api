@@ -32,7 +32,7 @@
 #include "uci.h"
 #include "syzygy/tbprobe.h"
 
-using std::string;
+namespace AntichessTb {
 
 namespace Zobrist {
 
@@ -47,11 +47,11 @@ namespace Zobrist {
 #ifdef THREECHECK
   Key checks[COLOR_NB][CHECKS_NB];
 #endif
-}
+} // namespace Zobrist
 
 namespace {
 
-const string PieceToChar(" PNBRQK  pnbrqk");
+const std::string PieceToChar(" PNBRQK  pnbrqk");
 
 constexpr Piece Pieces[] = { W_PAWN, W_KNIGHT, W_BISHOP, W_ROOK, W_QUEEN, W_KING,
                              B_PAWN, B_KNIGHT, B_BISHOP, B_ROOK, B_QUEEN, B_KING };
@@ -173,7 +173,7 @@ void Position::init() {
 /// This function is not very robust - make sure that input FENs are correct,
 /// this is assumed to be the responsibility of the GUI.
 
-Position& Position::set(const string& fenStr, bool isChess960, Variant v, StateInfo* si, Thread* th) {
+Position& Position::set(const std::string& fenStr, bool isChess960, Variant v, StateInfo* si, Thread* th) {
 /*
    A FEN string defines a particular position using only the ASCII character set.
 
@@ -238,7 +238,7 @@ Position& Position::set(const string& fenStr, bool isChess960, Variant v, StateI
 #endif
       }
 
-      else if ((idx = PieceToChar.find(token)) != string::npos) {
+      else if ((idx = PieceToChar.find(token)) != std::string::npos) {
           put_piece(Piece(idx), sq);
           ++sq;
       }
@@ -262,7 +262,7 @@ Position& Position::set(const string& fenStr, bool isChess960, Variant v, StateI
       {
           if (token == ']')
               continue;
-          else if ((idx = PieceToChar.find(token)) != string::npos)
+          else if ((idx = PieceToChar.find(token)) != std::string::npos)
               add_to_hand(color_of(Piece(idx)), type_of(Piece(idx)));
       }
 #endif
@@ -627,9 +627,9 @@ void Position::set_state(StateInfo* si) const {
 /// the given endgame code string like "KBPvKN". It is mainly a helper to
 /// get the material key out of an endgame code.
 
-Position& Position::set(const string& code, Color c, Variant v, StateInfo* si) {
+Position& Position::set(const std::string& code, Color c, Variant v, StateInfo* si) {
 
-  string sides[COLOR_NB];
+  std::string sides[COLOR_NB];
   switch (v)
   {
 #ifdef ANTI
@@ -652,8 +652,8 @@ Position& Position::set(const string& code, Color c, Variant v, StateInfo* si) {
 
   std::transform(sides[c].begin(), sides[c].end(), sides[c].begin(), tolower);
 
-  string fenStr = "8/" + sides[0] + char(8 - sides[0].length() + '0') + "/8/8/8/8/"
-                       + sides[1] + char(8 - sides[1].length() + '0') + "/8 w - - 0 10";
+  std::string fenStr = "8/" + sides[0] + char(8 - sides[0].length() + '0') + "/8/8/8/8/"
+                            + sides[1] + char(8 - sides[1].length() + '0') + "/8 w - - 0 10";
 
   return set(fenStr, false, v, si, nullptr);
 }
@@ -662,7 +662,7 @@ Position& Position::set(const string& code, Color c, Variant v, StateInfo* si) {
 /// Position::fen() returns a FEN representation of the position. In case of
 /// Chess960 the Shredder-FEN notation is used. This is mainly a debugging function.
 
-const string Position::fen() const {
+const std::string Position::fen() const {
 
   int emptyCnt;
   std::ostringstream ss;
@@ -2483,7 +2483,7 @@ bool Position::has_game_cycle(int ply) const {
 
 void Position::flip() {
 
-  string f, token;
+  std::string f, token;
   std::stringstream ss(fen());
 
   for (Rank r = RANK_8; r >= RANK_1; --r) // Piece placement
@@ -2772,3 +2772,5 @@ void Position::reset()
   this->st = st;
   this->thisThread = Threads.main();
 }
+
+} // namespace AntichessTb

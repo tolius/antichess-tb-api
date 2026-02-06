@@ -26,6 +26,9 @@
 #include "syzygy/tbprobe.h"
 #include "tt.h"
 
+
+namespace AntichessTb {
+
 #ifndef _WIN32
 void* run_idle_loop(void* thread) {
   static_cast<Thread*>(thread)->idle_loop();
@@ -282,3 +285,5 @@ void ThreadPool::wait_for_search_finished() const {
         if (th != front())
             th->wait_for_search_finished();
 }
+
+} // namespace AntichessTb

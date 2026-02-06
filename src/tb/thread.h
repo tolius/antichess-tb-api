@@ -37,6 +37,8 @@
 #include "thread_win32_osx.h"
 
 
+namespace AntichessTb {
+
 /// Thread class keeps together all the thread-related stuff. We use
 /// per-thread pawn and material hash tables so that once we get a
 /// pointer to an entry its life time is unlimited and we don't have
@@ -135,5 +137,7 @@ private:
 };
 
 extern ThreadPool Threads;
+
+} // namespace AntichessTb
 
 #endif // #ifndef THREAD_H_INCLUDED

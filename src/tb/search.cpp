@@ -35,6 +35,8 @@
 #include "uci.h"
 #include "syzygy/tbprobe.h"
 
+namespace AntichessTb {
+
 namespace Search {
 
   LimitsType Limits;
@@ -569,7 +571,7 @@ void Thread::search() {
           while (true)
           {
               Depth adjustedDepth = std::max(1, rootDepth - failedHighCnt - searchAgainCounter);
-              bestValue = ::search<PV>(rootPos, ss, alpha, beta, adjustedDepth, false);
+              bestValue = AntichessTb::search<PV>(rootPos, ss, alpha, beta, adjustedDepth, false);
 #ifdef HELPMATE
               if (rootPos.is_helpmate()) bestValue = -bestValue;
 #endif
@@ -2271,3 +2273,5 @@ void Tablebases::rank_root_moves(Position& pos, Search::RootMoves& rootMoves) {
             m.tbRank = 0;
     }
 }
+
+} // namespace AntichessTb

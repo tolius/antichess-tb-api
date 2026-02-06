@@ -25,6 +25,9 @@
 
 #include "types.h"
 
+
+namespace AntichessTb {
+
 class Position;
 
 namespace UCI {
@@ -80,5 +83,7 @@ Variant variant_from_name(const std::string& str);
 } // namespace UCI
 
 extern UCI::OptionsMap Options;
+
+} // namespace AntichessTb
 
 #endif // #ifndef UCI_H_INCLUDED

@@ -23,6 +23,9 @@
 #include "bitboard.h"
 #include "types.h"
 
+
+namespace AntichessTb {
+
 namespace {
 
   // There are 24 possible pawn squares: files A to D and ranks from 2 to 7.
@@ -168,3 +171,5 @@ namespace {
   }
 
 } // namespace
+
+} // namespace AntichessTb

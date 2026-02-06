@@ -32,16 +32,10 @@
 #include "elements.h"
 #include "../types.h"
 
-namespace fs = std::filesystem;
-using namespace egtb;
+
+namespace AntichessTb {
 
 namespace {
-
-#ifdef USE_FAIRY_SF
-    static constexpr int TB_KING = 6;
-    static constexpr int TB_W_KING = TB_KING;
-    static constexpr int TB_B_KING = TB_KING + 8;
-#endif
 
 inline Square operator^=(Square& s, int i) { return s = Square(int(s) ^ i); }
 inline Square operator^(Square s, int i) { return Square(int(s) ^ i); }
@@ -222,11 +216,7 @@ void set_groups(TBTable& e, PairsData* d, int order[], File f)
                 idx *= 31332;
             else if (e.numUniquePieces == 2)
                 // Standard or Atomic/Giveaway
-#ifdef USE_FAIRY_SF
-                idx *= (e.variant == "chess") ? 462 : 518;
-#else
                 idx *= (e.variant == CHESS_VARIANT) ? 462 : 518;
-#endif
             else if (e.minLikeMan == 2)
                 idx *= 278;
             else
@@ -276,19 +266,7 @@ void set(TBTable& e, const uint8_t*& data)
 
         for (int k = 0; k < e.pieceCount; ++k, ++data)
             for (int i = 0; i < sides; i++) {
-#ifdef USE_FAIRY_SF
-                int pt(i ? *data >> 4 : *data & 0xF);
-                if (pt == TB_W_KING)
-                    e.get(i, f)->pieces[k] = make_piece(WHITE, COMMONER);
-                else if (pt == TB_B_KING)
-                    e.get(i, f)->pieces[k] = make_piece(BLACK, COMMONER);
-                else if (pt >= 8)
-                    e.get(i, f)->pieces[k] = (Piece)(pt - 8 + PIECE_TYPE_NB);
-                else
-                    e.get(i, f)->pieces[k] = (Piece)pt;
-#else
                 e.get(i, f)->pieces[k] = Piece(i ? *data >> 4 : *data & 0xF);
-#endif
             }
 
         for (int i = 0; i < sides; ++i)
@@ -296,26 +274,7 @@ void set(TBTable& e, const uint8_t*& data)
     }
 }
 
-#ifdef USE_FAIRY_SF
-Position& set_variant_pos(Position& pos, const string& code, Color c, StateInfo* si)
-{
-    assert(code.length() > 0 && code.length() < 9);
-    string sides[COLOR_NB] = { code.substr(code.find('v') + 1),  // Weak
-                               code.substr(0, code.find('v')) }; // Strong
-
-    assert(sides[0].length() > 0 && sides[0].length() < 8);
-    assert(sides[1].length() > 0 && sides[1].length() < 8);
-
-    std::transform(sides[c].begin(), sides[c].end(), sides[c].begin(), ::tolower);
-
-    string fenStr = "8/" + sides[0] + char(8 - sides[0].length() + '0') + "/8/8/8/8/"
-        + sides[1] + char(8 - sides[1].length() + '0') + "/8 w - - 0 10";
-
-    return pos.set(Stockfish::variants.find(string(TBTable::variant))->second, fenStr, false, si, nullptr);
-}
-#endif
-
-// Called at every probe, memory map and init only at first access. 
+// Called at every probe, memory map and init only at first access.
 // Function is thread safe and can be called concurrently.
 void TBTable_init(TBTable& e, const Position& pos, const uint8_t*& data)
 {
@@ -343,11 +302,6 @@ void TBTable_init(TBTable& e, const Position& pos, const uint8_t*& data)
             {
                 Piece piece = e.get(WHITE, FILE_A)->pieces[i];
                 int i_piece = type_of(piece);
-#ifdef USE_FAIRY_SF
-                if (i_piece == COMMONER)
-                    i_piece = TB_KING;
-                assert(i_piece > 0 && i_piece <= TB_KING);
-#endif
                 if (color_of(piece) == WHITE)
                     w2 += PIECE_SYMBOLS[i_piece];
                 else
@@ -356,11 +310,7 @@ void TBTable_init(TBTable& e, const Position& pos, const uint8_t*& data)
 
             Position pos2;
             StateInfo st;
-#ifdef USE_FAIRY_SF
-            Key key = set_variant_pos(pos2, w2 + "v" + b2, WHITE, &st).material_key();
-#else
             Key key = pos2.set(w2 + "v" + b2, WHITE, pos.subvariant(), &st).material_key();
-#endif
 
             if (key != e.key) {
                 std::swap(e.key, e.key2);
@@ -372,18 +322,14 @@ void TBTable_init(TBTable& e, const Position& pos, const uint8_t*& data)
     }
 }
 
-}
+} // namespace
 
 TBTable::TBTable(const std::string& code, const char* data)
 {
     StateInfo st;
     Position pos;
 
-#ifdef USE_FAIRY_SF
-    key = set_variant_pos(pos, code, WHITE, &st).material_key();
-#else
     key = pos.set(code, WHITE, variant, &st).material_key();
-#endif
     pieceCount = pos.count<ALL_PIECES>();
     hasPawns = pos.pieces(PAWN);
 
@@ -410,11 +356,7 @@ TBTable::TBTable(const std::string& code, const char* data)
     pawnCount[0] = pos.count<PAWN>(c ? WHITE : BLACK);
     pawnCount[1] = pos.count<PAWN>(c ? BLACK : WHITE);
 
-#ifdef USE_FAIRY_SF
-    key2 = set_variant_pos(pos, code, BLACK, &st).material_key();
-#else
     key2 = pos.set(code, BLACK, variant, &st).material_key();
-#endif
 
     const uint8_t* data_start = reinterpret_cast<const uint8_t*>(data);
     const uint8_t* data_end = data_start;
@@ -469,11 +411,7 @@ uint64_t TBTable::get_idx(const Position& pos/*, bool* is_inversion*/) const
 
         leadPawns = b = pos.pieces(color_of(pc), PAWN);
         do
-#ifdef USE_FAIRY_SF
-            squares[size++] = pop_lsb(b) ^ flipSquares;
-#else
             squares[size++] = pop_lsb(&b) ^ flipSquares;
-#endif
         while (b);
 
         leadPawnsCnt = size;
@@ -489,11 +427,7 @@ uint64_t TBTable::get_idx(const Position& pos/*, bool* is_inversion*/) const
     // directly map them to the correct color and square.
     b = pos.pieces() ^ leadPawns;
     do {
-#ifdef USE_FAIRY_SF
-        Square s = pop_lsb(b);
-#else
         Square s = pop_lsb(&b);
-#endif
         squares[size] = s ^ flipSquares;
         pieces[size++] = Piece(pos.piece_on(s) ^ flipColor);
     } while (b);
@@ -859,3 +793,5 @@ void Tablebases_init()
             LeadPawnsSize[leadPawnsCnt][f] = idx;
         }
 }
+
+} // namespace AntichessTb

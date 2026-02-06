@@ -22,6 +22,9 @@
 #include "bitboard.h"
 #include "misc.h"
 
+
+namespace AntichessTb {
+
 uint8_t PopCnt16[1 << 16];
 uint8_t SquareDistance[SQUARE_NB][SQUARE_NB];
 
@@ -246,3 +249,5 @@ namespace {
     }
   }
 }
+
+} // namespace AntichessTb

@@ -27,6 +27,9 @@
 
 #include "types.h"
 
+
+namespace AntichessTb {
+
 const std::string engine_info(bool to_uci = false);
 const std::string compiler_info();
 void prefetch(void* addr);
@@ -130,5 +133,7 @@ namespace CommandLine {
   extern std::string binaryDirectory;  // path of the executable directory
   extern std::string workingDirectory; // path of the working directory
 }
+
+} // namespace AntichessTb
 
 #endif // #ifndef MISC_H_INCLUDED
