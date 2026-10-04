@@ -26,9 +26,11 @@
 #include <unistd.h>
 #endif
 #include <sys/stat.h>
+#ifdef _WIN32
+#include <io.h> /* _open(), _read(), _close() */
+#endif
 #ifdef HAVE_MMAP
 #ifdef _WIN32
-#include <io.h>
 #define NOMINMAX
 #include <windows.h>
 #else
@@ -38,6 +40,10 @@
 //#include <ctype.h>
 #include <fcntl.h>
 #include <assert.h>
+
+#ifndef O_BINARY
+#define O_BINARY 0 /* only Windows distinguishes text and binary mode */
+#endif
 
 #define USE_CACHE 1
 
@@ -240,6 +246,7 @@ dictData *dict_data_open(const char *filename, int computeCRC)
 
 	memset(h, 0, sizeof(struct dictData));
 	h->initialized = 0;
+	h->fd = -1; /* no file open (the file is closed again at the end of this function) */
 
 	if (stat(filename, &sb) || !S_ISREG(sb.st_mode)) {
 		err_warning(__func__,
@@ -252,7 +259,9 @@ dictData *dict_data_open(const char *filename, int computeCRC)
 			"\"%s\" not in text or dzip format\n", filename);
 	}
 
-	if ((h->fd = open(filename, O_RDONLY)) < 0)
+	/* Binary mode: in text mode, Windows' read() converts CR LF to LF (up to the
+	   first Ctrl+Z byte), which corrupts the compressed data. */
+	if ((h->fd = open(filename, O_RDONLY | O_BINARY)) < 0)
 		err_fatal_errno(__func__,
 			"Cannot open data file \"%s\"\n", filename);
 	if (fstat(h->fd, &sb))
@@ -263,20 +272,16 @@ dictData *dict_data_open(const char *filename, int computeCRC)
 	if (mmap_mode) {
 #ifdef HAVE_MMAP
 #	ifdef _WIN32
-		h->mapping = NULL;
+		/* The handle belongs to h->fd and is closed with it (not with CloseHandle) */
 		HANDLE handle = (HANDLE)_get_osfhandle(h->fd);
 		if (handle == INVALID_HANDLE_VALUE)
-			err_fatal_errno(__func__, "Cannot get mmap data file \"%s\"\n", filename);
-		else {
-			DWORD size_high;
-			DWORD size_low = GetFileSize(handle, &size_high);
-			h->mapping = CreateFileMapping(handle, NULL, PAGE_READONLY, size_high, size_low, NULL);
-			CloseHandle(handle);
-			if (h->mapping)
-				h->start = (char*)MapViewOfFile(h->mapping, FILE_MAP_READ, 0, 0, 0);
-			else
-				err_fatal_errno(__func__, "Cannot mmap data file \"%s\"\n", filename);
-		}
+			err_fatal_errno(__func__, "Cannot get handle of data file \"%s\"\n", filename);
+		h->mapping = CreateFileMapping(handle, NULL, PAGE_READONLY, 0, 0, NULL);
+		if (!h->mapping)
+			err_fatal(__func__, "Cannot mmap data file \"%s\" (error %lu)\n", filename, GetLastError());
+		h->start = (char*)MapViewOfFile(h->mapping, FILE_MAP_READ, 0, 0, 0);
+		if (!h->start)
+			err_fatal(__func__, "Cannot map view of data file \"%s\" (error %lu)\n", filename, GetLastError());
 #	else
 		h->start = (char*)mmap(NULL, h->size, PROT_READ, MAP_SHARED, h->fd, 0);
 		if ((void*)h->start == (void*)(-1))
@@ -287,12 +292,18 @@ dictData *dict_data_open(const char *filename, int computeCRC)
 #endif
 	}
 	else {
+		unsigned long total = 0;
 		h->start = xmalloc(h->size);
-		if (-1 == read(h->fd, (char *)h->start, h->size))
-			err_fatal_errno(__func__, "Cannot read data file \"%s\"\n", filename);
-		close(h->fd);
-		h->fd = 0;
+		while (total < h->size) {
+			int count = read(h->fd, (char *)h->start + total, (unsigned int)(h->size - total));
+			if (count <= 0)
+				err_fatal_errno(__func__, "Cannot read data file \"%s\"\n", filename);
+			total += count;
+		}
 	}
+	/* A mapping stays valid after the file is closed */
+	close(h->fd);
+	h->fd = -1;
 
 	h->end = h->start + h->size;
 
@@ -313,7 +324,8 @@ void dict_data_close(dictData *header)
 	if (!header)
 		return;
 
-	if (header->fd >= 0) {
+	/* start is NULL if the file was not opened (e.g. it doesn't exist) */
+	if (header->start) {
 		if (mmap_mode) {
 #ifdef HAVE_MMAP
 	#ifdef _WIN32
@@ -322,18 +334,14 @@ void dict_data_close(dictData *header)
 			header->mapping = NULL;
 	#else
 			munmap((void*)header->start, header->size);
-			close(header->fd);
 	#endif
-			header->fd = 0;
-			header->start = header->end = NULL;
 #else
 			err_fatal(__func__, "This should not happen");
 #endif
 		}
-		else {
-			if (header->start)
-				xfree((char *)header->start);
-		}
+		else
+			xfree((char *)header->start);
+		header->start = header->end = NULL;
 	}
 
 	if (header->chunks)       xfree(header->chunks);
