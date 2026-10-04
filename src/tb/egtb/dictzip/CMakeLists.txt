@@ -4,9 +4,9 @@ project(dictzip LANGUAGES C)
 
 if(ARCH_FLAGS)
 	if (WIN32)
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -arch:${ARCH_FLAGS}")
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -arch:${ARCH_FLAGS}")
 	else()
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=${ARCH_FLAGS}")
+		set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=${ARCH_FLAGS}")
 	endif()
 endif()
 
@@ -39,10 +39,6 @@ if (WIN32)
 		PRIVATE _CRT_SECURE_NO_WARNINGS
 		PRIVATE HAVE_MMAP
 	)
-	target_compile_options(${PROJECT_NAME}
-		PRIVATE "/Ox"
-		PRIVATE "/GL"
-	)
 else()
 	target_compile_definitions(${PROJECT_NAME}
 		PRIVATE HAVE_UNISTD_H
@@ -52,6 +48,5 @@ else()
 	target_compile_options(${PROJECT_NAME}
 		PRIVATE "-Ofast"
 		PRIVATE "-flto"
-		PRIVATE "-march=${ARCH_FLAGS}"
 	)
 endif()
